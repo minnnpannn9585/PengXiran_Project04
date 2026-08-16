@@ -296,6 +296,16 @@
       },
       "url": "https://packages.unity.cn"
     },
+    "com.unity.xr.picoxr": {
+      "version": "file:C:/Users/minpa/Downloads/PICO Unity Integration SDK-3.0.0-240902",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.unity.xr.management": "4.0.0",
+        "com.unity.xr.interaction.toolkit": "2.0.0",
+        "com.unity.xr.core-utils": "2.3.0"
+      }
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,
