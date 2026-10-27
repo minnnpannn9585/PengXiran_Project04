@@ -9,8 +9,16 @@ public enum GamePhase
     Complete
 }
 
+public enum DeerPhase
+{
+    Waiting,
+    Gathering,
+    Delivering,
+    Healed
+}
+
 /// <summary>
-/// Phase 1 is the wolf's request. Phase 2 is bringing the ball back. Phase 3 is throwing it onto the marker.
+/// Wolf quest phases, then the fawn's medicine quest.
 /// </summary>
 public class GameManager : MonoBehaviour
 {
@@ -22,6 +30,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] LostBall m_Ball;
     [SerializeField] BallReturn m_ReturnVolume;
     [SerializeField] BallTarget m_Target;
+    [SerializeField] DeerPhase m_DeerPhase = DeerPhase.Waiting;
 
     bool m_ThrowInFlight;
     float m_FlightTime;
@@ -31,10 +40,36 @@ public class GameManager : MonoBehaviour
 
     public GamePhase Phase => m_Phase;
 
+    public DeerPhase DeerQuest => m_DeerPhase;
+
+    public static GameManager Instance { get; private set; }
+
+    public bool CanGatherHerbs => m_DeerPhase == DeerPhase.Waiting || m_DeerPhase == DeerPhase.Gathering;
+
+    public void NoteDeerProgress()
+    {
+        if (m_DeerPhase == DeerPhase.Waiting)
+            m_DeerPhase = DeerPhase.Gathering;
+    }
+
+    public void OnMedicineBrewed()
+    {
+        NoteDeerProgress();
+        if (m_DeerPhase == DeerPhase.Gathering)
+            m_DeerPhase = DeerPhase.Delivering;
+    }
+
+    public void OnDeerHealed()
+    {
+        m_DeerPhase = DeerPhase.Healed;
+    }
+
     void OnEnable()
     {
         if (!Application.isPlaying)
             return;
+
+        Instance = this;
 
         if (m_Wolf != null)
         {
@@ -65,6 +100,9 @@ public class GameManager : MonoBehaviour
 
     void OnDisable()
     {
+        if (Instance == this)
+            Instance = null;
+
         if (m_Wolf != null)
         {
             m_Wolf.Finished -= OnWolfFinished;
