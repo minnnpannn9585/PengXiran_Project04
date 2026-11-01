@@ -18,7 +18,7 @@ public enum DeerPhase
 }
 
 /// <summary>
-/// Wolf quest phases, then the fawn's medicine quest.
+/// Wolf quest phases, then the fawn's medicine quest and the fox's reunion.
 /// </summary>
 public class GameManager : MonoBehaviour
 {
@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviour
     public GamePhase Phase => m_Phase;
 
     public DeerPhase DeerQuest => m_DeerPhase;
+
+    public bool CanStartFoxQuest => m_Phase == GamePhase.Complete && m_DeerPhase == DeerPhase.Healed;
 
     public static GameManager Instance { get; private set; }
 

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e60c557ade5177f4aa12d6e07302b96f, type: 3}
+  m_Name: FoxIntroduction
+  m_EditorClassIdentifier: 
+  m_SpeakerName: Fox
+  m_Lines:
+  - A rabbit helped me when I was lost and hungry, a long time ago.
+  - I never had a chance to thank my friend. I want to repay that kindness.
+  - Will you help me find that rabbit? Follow the glowing blue paw prints. I will
+    come with you.

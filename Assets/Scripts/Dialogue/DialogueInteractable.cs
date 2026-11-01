@@ -91,6 +91,19 @@ public class DialogueInteractable : MonoBehaviour
         m_Queued = data;
     }
 
+    /// <summary>Replace both an idle prompt and an already-open conversation.</summary>
+    public void ResetConversation(DialogueData data)
+    {
+        if (data == null || data.LineCount == 0)
+            return;
+        m_Data = data;
+        m_Queued = null;
+        m_LineIndex = -1;
+        m_ShownLine = int.MinValue;
+        m_LineComplete = true;
+        m_VisibleUntil = 0f;
+    }
+
     public void Play(DialogueData data)
     {
         if (data == null || data.LineCount == 0)
@@ -135,6 +148,8 @@ public class DialogueInteractable : MonoBehaviour
 
     void OnEnable()
     {
+        if (m_Bubble != null)
+            m_Bubble.SetActive(true);
         if (m_Interactable == null)
             m_Interactable = GetComponent<XRSimpleInteractable>();
         if (m_Interactable == null)
@@ -147,6 +162,9 @@ public class DialogueInteractable : MonoBehaviour
 
     void OnDisable()
     {
+        m_Hovering.Clear();
+        if (m_Bubble != null)
+            m_Bubble.SetActive(false);
         if (m_Interactable == null)
             return;
 
@@ -238,6 +256,8 @@ public class DialogueInteractable : MonoBehaviour
 
     void TryAdvance()
     {
+        if (!isActiveAndEnabled || !m_Ready)
+            return;
         if (Time.time < m_NextAdvanceTime)
             return;
 
