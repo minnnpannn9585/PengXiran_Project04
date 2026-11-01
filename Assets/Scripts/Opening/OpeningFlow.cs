@@ -268,35 +268,43 @@ public class OpeningFlow : MonoBehaviour
         var rect = root.GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2(1680f, 980f);
 
-        var sprite = WhiteSprite();
+        Sprite sprite = null;
         var font = LoadFont();
 
-        var backdrop = CreateImage("Backdrop", rect, sprite, new Color(0.05f, 0.07f, 0.05f, 0.55f));
+        var backdrop = GroveUi.CreateSurface("Backdrop", rect, GroveUi.Surface, 40f);
         Stretch(backdrop.rectTransform);
 
         m_MenuGroup = CreateGroup("Menu", rect);
         var menu = m_MenuGroup.GetComponent<RectTransform>();
         Stretch(menu);
 
-        var rule = CreateImage("Rule", menu, sprite, new Color(0.86f, 0.68f, 0.36f, 0.9f));
+        var rule = GroveUi.CreateSurface("Rule", menu, GroveUi.Accent, 2f);
         rule.rectTransform.anchorMin = rule.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-        rule.rectTransform.sizeDelta = new Vector2(280f, 4f);
+        rule.rectTransform.sizeDelta = new Vector2(72f, 4f);
         rule.rectTransform.anchoredPosition = new Vector2(0f, 150f);
 
-        var title = CreateText("Title", menu, font, 78f, FontStyles.Bold, TextAlignmentOptions.Center, new Color(0.98f, 0.88f, 0.64f));
+        var eyebrow = CreateText("Eyebrow", menu, font, 22f, FontStyles.Normal, TextAlignmentOptions.Center, GroveUi.Accent);
+        eyebrow.text = "A QUIET FOREST ADVENTURE";
+        eyebrow.characterSpacing = 5f;
+        eyebrow.rectTransform.sizeDelta = new Vector2(1000f, 40f);
+        eyebrow.rectTransform.anchoredPosition = new Vector2(0f, 340f);
+
+        var title = CreateText("Title", menu, font, 88f, FontStyles.Bold, TextAlignmentOptions.Center, GroveUi.Text);
         title.text = "Grove Elf";
         title.rectTransform.anchorMin = title.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         title.rectTransform.sizeDelta = new Vector2(1400f, 120f);
         title.rectTransform.anchoredPosition = new Vector2(0f, 230f);
 
-        var subtitle = CreateText("Subtitle", menu, font, 32f, FontStyles.Italic, TextAlignmentOptions.Center, new Color(0.86f, 0.9f, 0.78f));
+        var subtitle = CreateText("Subtitle", menu, font, 30f, FontStyles.Normal, TextAlignmentOptions.Center, GroveUi.Muted);
         subtitle.text = "An elf among the small souls of the wood";
         subtitle.rectTransform.anchorMin = subtitle.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         subtitle.rectTransform.sizeDelta = new Vector2(1400f, 70f);
         subtitle.rectTransform.anchoredPosition = new Vector2(0f, 80f);
 
-        CreateChoice(menu, font, sprite, "Begin", new Vector2(0f, -40f), Begin);
-        CreateChoice(menu, font, sprite, "Leave", new Vector2(0f, -160f), Leave);
+        var begin = CreateChoice(menu, font, "Begin", new Vector2(0f, -48f), Begin, true);
+        CreateChoice(menu, font, "Leave", new Vector2(0f, -160f), Leave);
+        if (EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(begin.gameObject);
 
         m_StoryGroup = CreateGroup("Story", rect);
         var story = m_StoryGroup.GetComponent<RectTransform>();
@@ -305,55 +313,65 @@ public class OpeningFlow : MonoBehaviour
         m_StoryGroup.interactable = false;
         m_StoryGroup.blocksRaycasts = false;
 
-        var veil = CreateImage("Veil", story, sprite, new Color(0.03f, 0.05f, 0.04f, 0.72f));
+        var veil = GroveUi.CreateSurface("Veil", story, GroveUi.Surface, 40f);
         Stretch(veil.rectTransform);
 
         m_ContinueButton = CreateButton("Continue", story, sprite, new Color(0f, 0f, 0f, 0f), Advance);
         Stretch(m_ContinueButton.GetComponent<RectTransform>());
         m_ContinueButton.transition = Selectable.Transition.None;
 
-        m_StoryText = CreateText("Line", story, font, 48f, FontStyles.Normal, TextAlignmentOptions.Center, new Color(0.96f, 0.93f, 0.86f));
+        m_StoryText = CreateText("Line", story, font, 48f, FontStyles.Normal, TextAlignmentOptions.Center, GroveUi.Text);
+        m_StoryText.lineSpacing = 12f;
         m_StoryText.text = string.Empty;
         m_StoryText.rectTransform.anchorMin = m_StoryText.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-        m_StoryText.rectTransform.sizeDelta = new Vector2(1360f, 320f);
+        m_StoryText.rectTransform.sizeDelta = new Vector2(1200f, 360f);
         m_StoryText.rectTransform.anchoredPosition = new Vector2(0f, 20f);
 
-        m_StoryCount = CreateText("Count", story, font, 24f, FontStyles.Bold, TextAlignmentOptions.Center, new Color(0.86f, 0.68f, 0.36f));
+        m_StoryCount = CreateText("Count", story, font, 24f, FontStyles.Normal, TextAlignmentOptions.Center, GroveUi.Accent);
+        m_StoryCount.characterSpacing = 4f;
         m_StoryCount.rectTransform.anchorMin = m_StoryCount.rectTransform.anchorMax = new Vector2(0.5f, 0f);
         m_StoryCount.rectTransform.sizeDelta = new Vector2(400f, 40f);
         m_StoryCount.rectTransform.anchoredPosition = new Vector2(0f, 150f);
 
-        m_StoryHint = CreateText("Hint", story, font, 26f, FontStyles.Italic, TextAlignmentOptions.Center, new Color(0.78f, 0.8f, 0.7f));
+        m_StoryHint = CreateText("Hint", story, font, 26f, FontStyles.Normal, TextAlignmentOptions.Center, GroveUi.Muted);
         m_StoryHint.rectTransform.anchorMin = m_StoryHint.rectTransform.anchorMax = new Vector2(0.5f, 0f);
         m_StoryHint.rectTransform.sizeDelta = new Vector2(1200f, 50f);
         m_StoryHint.rectTransform.anchoredPosition = new Vector2(0f, 90f);
 
-        var skip = CreateChoice(story, font, sprite, "Skip", new Vector2(620f, 400f), Skip);
+        var skip = CreateChoice(story, font, "Skip", new Vector2(620f, 400f), Skip);
         var skipRect = skip.GetComponent<RectTransform>();
         skipRect.sizeDelta = new Vector2(220f, 64f);
     }
 
     void BuildFade()
     {
-        m_Fade = SceneFade.Create(WhiteSprite());
+        m_Fade = SceneFade.Create(null);
     }
 
-    Button CreateChoice(Transform parent, TMP_FontAsset font, Sprite sprite, string label, Vector2 position, UnityEngine.Events.UnityAction action)
+    Button CreateChoice(Transform parent, TMP_FontAsset font, string label, Vector2 position, UnityEngine.Events.UnityAction action, bool primary = false)
     {
-        var button = CreateButton(label, parent, sprite, new Color(0.22f, 0.15f, 0.09f, 0.96f), action);
+        // Let Selectable own the tint. Tinting the Image too multiplies the colors
+        // and made the old buttons almost black, including their hover state.
+        var image = GroveUi.CreateSurface(label, parent, Color.white, 18f);
+        image.raycastTarget = true;
+        var button = image.gameObject.AddComponent<Button>();
+        button.targetGraphic = image;
+        button.onClick.AddListener(action);
         var rect = button.GetComponent<RectTransform>();
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.sizeDelta = new Vector2(460f, 88f);
         rect.anchoredPosition = position;
 
         var colors = button.colors;
-        colors.normalColor = new Color(0.22f, 0.15f, 0.09f, 0.96f);
-        colors.highlightedColor = new Color(0.4f, 0.28f, 0.14f, 1f);
-        colors.pressedColor = new Color(0.62f, 0.44f, 0.2f, 1f);
+        colors.normalColor = primary ? GroveUi.Sage : new Color(0.15f, 0.22f, 0.18f);
+        colors.highlightedColor = primary ? new Color(0.87f, 0.94f, 0.80f) : new Color(0.25f, 0.34f, 0.28f);
+        colors.pressedColor = primary ? new Color(0.61f, 0.73f, 0.55f) : new Color(0.11f, 0.17f, 0.14f);
         colors.selectedColor = colors.highlightedColor;
+        colors.disabledColor = new Color(0.22f, 0.27f, 0.23f, 0.5f);
+        colors.fadeDuration = 0.12f;
         button.colors = colors;
 
-        var text = CreateText("Label", button.transform, font, 36f, FontStyles.Bold, TextAlignmentOptions.Center, new Color(0.98f, 0.9f, 0.72f));
+        var text = CreateText("Label", button.transform, font, 32f, primary ? FontStyles.Bold : FontStyles.Normal, TextAlignmentOptions.Center, primary ? new Color(0.08f, 0.14f, 0.11f) : GroveUi.Text);
         text.text = label;
         Stretch(text.rectTransform);
         return button;
@@ -421,23 +439,6 @@ public class OpeningFlow : MonoBehaviour
         return Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
     }
 
-    static Sprite WhiteSprite()
-    {
-        var texture = new Texture2D(4, 4, TextureFormat.RGBA32, false)
-        {
-            hideFlags = HideFlags.HideAndDontSave,
-            wrapMode = TextureWrapMode.Clamp,
-            filterMode = FilterMode.Bilinear
-        };
-        var pixels = new Color[16];
-        for (int i = 0; i < pixels.Length; i++)
-            pixels[i] = Color.white;
-        texture.SetPixels(pixels);
-        texture.Apply();
-        var sprite = Sprite.Create(texture, new Rect(0f, 0f, 4f, 4f), new Vector2(0.5f, 0.5f), 4f);
-        sprite.hideFlags = HideFlags.HideAndDontSave;
-        return sprite;
-    }
 }
 
 /// <summary>

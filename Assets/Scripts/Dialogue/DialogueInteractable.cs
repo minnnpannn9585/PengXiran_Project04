@@ -50,7 +50,9 @@ public class DialogueInteractable : MonoBehaviour
     TextMeshProUGUI m_NameText;
     TextMeshProUGUI m_BodyText;
     TextMeshProUGUI m_HintText;
-    readonly List<UnityEngine.Object> m_GeneratedAssets = new List<UnityEngine.Object>();
+    TextMeshProUGUI m_ProgressText;
+    RectTransform m_PanelRect;
+    RectTransform m_ShadowRect;
 
     BubbleView m_View = BubbleView.Hidden;
     int m_LineIndex = -1;
@@ -151,15 +153,6 @@ public class DialogueInteractable : MonoBehaviour
         m_Interactable.hoverEntered.RemoveListener(OnHoverEntered);
         m_Interactable.hoverExited.RemoveListener(OnHoverExited);
         m_Interactable.selectEntered.RemoveListener(OnSelectEntered);
-    }
-
-    void OnDestroy()
-    {
-        for (int i = 0; i < m_GeneratedAssets.Count; i++)
-        {
-            if (m_GeneratedAssets[i] != null)
-                Destroy(m_GeneratedAssets[i]);
-        }
     }
 
     void Update()
@@ -324,9 +317,10 @@ public class DialogueInteractable : MonoBehaviour
             m_View = BubbleView.Prompt;
             m_LineComplete = true;
             SetText(m_NameText, m_Data.SpeakerName);
-            SetText(m_BodyText, PromptText());
+            SetBody(PromptText());
             m_BodyText.maxVisibleCharacters = ShowAllCharacters;
             SetText(m_HintText, string.Empty);
+            SetText(m_ProgressText, "LET'S TALK");
             return;
         }
 
@@ -335,7 +329,8 @@ public class DialogueInteractable : MonoBehaviour
         {
             m_ShownLine = m_LineIndex;
             SetText(m_NameText, m_Data.SpeakerName);
-            SetText(m_BodyText, m_Data.GetLine(m_LineIndex));
+            SetBody(m_Data.GetLine(m_LineIndex));
+            SetText(m_ProgressText, $"{m_LineIndex + 1:00} / {m_Data.LineCount:00}");
             m_BodyText.ForceMeshUpdate();
             m_VisibleCharacters = 0f;
             int count = m_BodyText.textInfo.characterCount;
@@ -389,17 +384,16 @@ public class DialogueInteractable : MonoBehaviour
     string ContinueHint()
     {
         bool repeat = m_Loop && m_LineIndex >= m_Data.LineCount - 1;
-        string progress = $"{m_LineIndex + 1}/{m_Data.LineCount}";
         if (UsingControllers())
         {
             return repeat
-                ? $"{progress}  ·  Grip or trigger to hear that again"
-                : $"{progress}  ·  Grip or trigger to continue";
+                ? "Grip or trigger to hear that again"
+                : "Grip or trigger to continue";
         }
 
         return repeat
-            ? $"{progress}  ·  Press E to hear that again"
-            : $"{progress}  ·  Press E to continue";
+            ? "Press E to hear that again"
+            : "Press E to continue";
     }
 
     static bool UsingControllers()
@@ -522,12 +516,6 @@ public class DialogueInteractable : MonoBehaviour
             return;
         }
 
-        var fill = new Color(0.13f, 0.09f, 0.07f, 0.96f);
-        var border = new Color(0.86f, 0.62f, 0.34f, 1f);
-        var panelSprite = CreateRoundedSprite(128, 32, fill, border, 3.2f);
-        var tailSprite = CreateTailSprite(fill);
-        var whiteSprite = CreateWhiteSprite();
-
         m_Bubble = new GameObject("SpeechBubble");
         m_Bubble.transform.SetParent(transform, false);
         m_Bubble.layer = 2;
@@ -550,64 +538,71 @@ public class DialogueInteractable : MonoBehaviour
         root.sizeDelta = new Vector2(960f, 540f);
         root.pivot = new Vector2(0.5f, 0f);
 
-        var shadow = CreateImage("Shadow", root, panelSprite, new Color(0f, 0f, 0f, 0.38f));
-        SetBottom(shadow.rectTransform, new Vector2(890f, 300f), new Vector2(8f, 16f));
+        var shadow = GroveUi.CreateSurface("Shadow", root, new Color(0.01f, 0.025f, 0.02f, 0.24f));
+        m_ShadowRect = shadow.rectTransform;
+        SetBottom(m_ShadowRect, new Vector2(880f, 268f), new Vector2(0f, 18f));
 
-        var tail = CreateImage("Tail", root, tailSprite, Color.white);
-        tail.type = Image.Type.Simple;
-        var tailRect = tail.rectTransform;
-        tailRect.anchorMin = tailRect.anchorMax = new Vector2(0.5f, 0f);
-        tailRect.pivot = new Vector2(0.5f, 0f);
-        tailRect.sizeDelta = new Vector2(70f, 42f);
-        tailRect.anchoredPosition = new Vector2(0f, 2f);
+        var panel = GroveUi.CreateSurface("Panel", root, GroveUi.Surface);
+        m_PanelRect = panel.rectTransform;
+        SetBottom(m_PanelRect, new Vector2(880f, 268f), new Vector2(0f, 26f));
 
-        var panel = CreateImage("Panel", root, panelSprite, Color.white);
-        SetBottom(panel.rectTransform, new Vector2(880f, 292f), new Vector2(0f, 26f));
-
-        var accent = CreateImage("Accent", panel.rectTransform, whiteSprite, new Color(0.93f, 0.66f, 0.36f, 1f));
-        accent.type = Image.Type.Simple;
+        var accent = GroveUi.CreateSurface("Accent", m_PanelRect, GroveUi.Accent, 2f);
         var accentRect = accent.rectTransform;
-        accentRect.anchorMin = new Vector2(0f, 1f);
-        accentRect.anchorMax = new Vector2(1f, 1f);
-        accentRect.pivot = new Vector2(0.5f, 1f);
-        accentRect.offsetMin = new Vector2(52f, -40f);
-        accentRect.offsetMax = new Vector2(-52f, -32f);
+        accentRect.anchorMin = accentRect.anchorMax = new Vector2(0f, 1f);
+        accentRect.pivot = new Vector2(0f, 1f);
+        accentRect.sizeDelta = new Vector2(4f, 24f);
+        accentRect.anchoredPosition = new Vector2(36f, -30f);
 
-        m_NameText = CreateText("Name", panel.rectTransform, font, 38f, FontStyles.Bold, TextAlignmentOptions.MidlineLeft, new Color(0.98f, 0.82f, 0.58f));
+        m_NameText = CreateText("Name", m_PanelRect, font, 28f, FontStyles.Bold, TextAlignmentOptions.MidlineLeft, GroveUi.Sage);
         var nameRect = m_NameText.rectTransform;
         nameRect.anchorMin = new Vector2(0f, 1f);
         nameRect.anchorMax = new Vector2(1f, 1f);
-        nameRect.pivot = new Vector2(0.5f, 1f);
-        nameRect.offsetMin = new Vector2(52f, -96f);
-        nameRect.offsetMax = new Vector2(-52f, -42f);
+        nameRect.offsetMin = new Vector2(56f, -64f);
+        nameRect.offsetMax = new Vector2(-240f, -20f);
 
-        m_BodyText = CreateText("Body", panel.rectTransform, font, 42f, FontStyles.Normal, TextAlignmentOptions.TopLeft, new Color(0.97f, 0.94f, 0.9f));
+        m_ProgressText = CreateText("Progress", m_PanelRect, font, 23f, FontStyles.Normal, TextAlignmentOptions.MidlineRight, GroveUi.Muted);
+        m_ProgressText.characterSpacing = 2f;
+        var progressRect = m_ProgressText.rectTransform;
+        progressRect.anchorMin = progressRect.anchorMax = Vector2.one;
+        progressRect.pivot = Vector2.one;
+        progressRect.sizeDelta = new Vector2(200f, 44f);
+        progressRect.anchoredPosition = new Vector2(-36f, -20f);
+
+        m_BodyText = CreateText("Body", m_PanelRect, font, 40f, FontStyles.Normal, TextAlignmentOptions.TopLeft, GroveUi.Text);
+        m_BodyText.lineSpacing = 6f;
         var bodyRect = m_BodyText.rectTransform;
         bodyRect.anchorMin = Vector2.zero;
         bodyRect.anchorMax = Vector2.one;
-        bodyRect.offsetMin = new Vector2(52f, 96f);
-        bodyRect.offsetMax = new Vector2(-52f, -102f);
+        bodyRect.offsetMin = new Vector2(36f, 76f);
+        bodyRect.offsetMax = new Vector2(-36f, -82f);
 
-        m_HintText = CreateText("Hint", panel.rectTransform, font, 24f, FontStyles.Italic, TextAlignmentOptions.MidlineLeft, new Color(0.86f, 0.78f, 0.66f, 1f));
+        var divider = GroveUi.CreateSurface("Divider", m_PanelRect, new Color(0.72f, 0.79f, 0.72f, 0.18f), 1f);
+        var dividerRect = divider.rectTransform;
+        dividerRect.anchorMin = Vector2.zero;
+        dividerRect.anchorMax = Vector2.right;
+        dividerRect.offsetMin = new Vector2(36f, 60f);
+        dividerRect.offsetMax = new Vector2(-36f, 61f);
+
+        m_HintText = CreateText("Hint", m_PanelRect, font, 24f, FontStyles.Normal, TextAlignmentOptions.MidlineLeft, GroveUi.Muted);
         var hintRect = m_HintText.rectTransform;
-        hintRect.anchorMin = new Vector2(0f, 0f);
-        hintRect.anchorMax = new Vector2(1f, 0f);
-        hintRect.pivot = new Vector2(0.5f, 0f);
-        hintRect.offsetMin = new Vector2(52f, 48f);
-        hintRect.offsetMax = new Vector2(-52f, 88f);
+        hintRect.anchorMin = Vector2.zero;
+        hintRect.anchorMax = Vector2.right;
+        hintRect.offsetMin = new Vector2(36f, 18f);
+        hintRect.offsetMax = new Vector2(-36f, 50f);
     }
 
-    Image CreateImage(string objectName, Transform parent, Sprite sprite, Color color)
+    void SetBody(string value)
     {
-        var go = new GameObject(objectName);
-        go.layer = 2;
-        go.transform.SetParent(parent, false);
-        var image = go.AddComponent<Image>();
-        image.sprite = sprite;
-        image.type = sprite == null ? Image.Type.Simple : Image.Type.Sliced;
-        image.color = color;
-        image.raycastTarget = false;
-        return image;
+        if (m_BodyText.text == value)
+            return;
+
+        m_BodyText.text = value;
+        // Measure the complete line before the typewriter starts, so the card never jumps
+        // or lets a third line run into the controls.
+        float bodyHeight = m_BodyText.GetPreferredValues(value, 808f, Mathf.Infinity).y;
+        float height = Mathf.Max(268f, Mathf.Ceil(bodyHeight) + 158f);
+        m_PanelRect.sizeDelta = new Vector2(880f, height);
+        m_ShadowRect.sizeDelta = m_PanelRect.sizeDelta;
     }
 
     TextMeshProUGUI CreateText(string objectName, Transform parent, TMP_FontAsset font, float size, FontStyles style, TextAlignmentOptions alignment, Color color)
@@ -651,108 +646,4 @@ public class DialogueInteractable : MonoBehaviour
         return Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
     }
 
-    Sprite CreateRoundedSprite(int size, int radius, Color fill, Color borderColor, float borderWidth)
-    {
-        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false)
-        {
-            wrapMode = TextureWrapMode.Clamp,
-            filterMode = FilterMode.Bilinear,
-            hideFlags = HideFlags.HideAndDontSave
-        };
-
-        var pixels = new Color[size * size];
-        float half = size * 0.5f;
-        var box = new Vector2(half - radius, half - radius);
-
-        for (int y = 0; y < size; y++)
-        {
-            for (int x = 0; x < size; x++)
-            {
-                var point = new Vector2(x + 0.5f - half, y + 0.5f - half);
-                var q = new Vector2(Mathf.Abs(point.x) - box.x, Mathf.Abs(point.y) - box.y);
-                float outside = new Vector2(Mathf.Max(q.x, 0f), Mathf.Max(q.y, 0f)).magnitude;
-                float inside = Mathf.Min(Mathf.Max(q.x, q.y), 0f);
-                float dist = outside + inside - radius;
-                float coverage = Mathf.Clamp01(0.75f - dist);
-                if (coverage <= 0f)
-                    continue;
-
-                var color = dist > -borderWidth ? borderColor : fill;
-                color.a *= coverage;
-                pixels[y * size + x] = color;
-            }
-        }
-
-        texture.SetPixels(pixels);
-        texture.Apply();
-        var sprite = Sprite.Create(
-            texture,
-            new Rect(0f, 0f, size, size),
-            new Vector2(0.5f, 0.5f),
-            1f,
-            0,
-            SpriteMeshType.FullRect,
-            new Vector4(radius, radius, radius, radius));
-        sprite.hideFlags = HideFlags.HideAndDontSave;
-        m_GeneratedAssets.Add(texture);
-        m_GeneratedAssets.Add(sprite);
-        return sprite;
-    }
-
-    Sprite CreateWhiteSprite()
-    {
-        var texture = new Texture2D(4, 4, TextureFormat.RGBA32, false)
-        {
-            wrapMode = TextureWrapMode.Clamp,
-            filterMode = FilterMode.Bilinear,
-            hideFlags = HideFlags.HideAndDontSave
-        };
-        var pixels = new Color[16];
-        for (int i = 0; i < pixels.Length; i++)
-            pixels[i] = Color.white;
-        texture.SetPixels(pixels);
-        texture.Apply();
-        var sprite = Sprite.Create(texture, new Rect(0f, 0f, 4f, 4f), new Vector2(0.5f, 0.5f), 1f);
-        sprite.hideFlags = HideFlags.HideAndDontSave;
-        m_GeneratedAssets.Add(texture);
-        m_GeneratedAssets.Add(sprite);
-        return sprite;
-    }
-
-    Sprite CreateTailSprite(Color color)
-    {
-        const int width = 64;
-        const int height = 48;
-        var texture = new Texture2D(width, height, TextureFormat.RGBA32, false)
-        {
-            wrapMode = TextureWrapMode.Clamp,
-            filterMode = FilterMode.Bilinear,
-            hideFlags = HideFlags.HideAndDontSave
-        };
-
-        var pixels = new Color[width * height];
-        for (int y = 0; y < height; y++)
-        {
-            float allowed = ((y + 0.5f) / height) * 0.5f;
-            for (int x = 0; x < width; x++)
-            {
-                float du = Mathf.Abs((x + 0.5f) / width - 0.5f);
-                float coverage = Mathf.Clamp01(0.8f - (du - allowed) * width);
-                if (coverage <= 0f)
-                    continue;
-
-                var pixel = color;
-                pixel.a *= coverage;
-                pixels[y * width + x] = pixel;
-            }
-        }
-
-        texture.SetPixels(pixels);
-        texture.Apply();
-        var sprite = Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0f), 1f);
-        sprite.hideFlags = HideFlags.HideAndDontSave;
-        m_GeneratedAssets.Add(texture);
-        m_GeneratedAssets.Add(sprite);
-        return sprite;
-    }
 }

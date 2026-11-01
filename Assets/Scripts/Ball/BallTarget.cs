@@ -84,9 +84,10 @@ public class BallTarget : MonoBehaviour
             AdditionalCanvasShaderChannels.Tangent;
 
         var rect = m_Label.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(520f, 120f);
+        rect.sizeDelta = new Vector2(360f, 104f);
         rect.pivot = new Vector2(0.5f, 0f);
         rect.localScale = Vector3.one * 0.004f;
+        GroveUi.AddPromptSurface(rect);
 
         var group = m_Label.AddComponent<CanvasGroup>();
         group.blocksRaycasts = false;
@@ -108,5 +109,7 @@ public class BallTarget : MonoBehaviour
         textRect.anchorMax = Vector2.one;
         textRect.offsetMin = Vector2.zero;
         textRect.offsetMax = Vector2.zero;
+        GroveUi.StylePrompt(m_LabelText);
+        m_LabelText.color = GroveUi.Sage;
     }
 }

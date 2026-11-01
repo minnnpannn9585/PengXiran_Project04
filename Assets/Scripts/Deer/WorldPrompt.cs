@@ -33,6 +33,7 @@ public class WorldPrompt : MonoBehaviour
         var rect = root.GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2(460f, 140f);
         rect.pivot = new Vector2(0.5f, 0f);
+        GroveUi.AddPromptSurface(rect);
 
         var group = root.AddComponent<CanvasGroup>();
         group.blocksRaycasts = false;
@@ -54,6 +55,7 @@ public class WorldPrompt : MonoBehaviour
         textRect.anchorMax = Vector2.one;
         textRect.offsetMin = Vector2.zero;
         textRect.offsetMax = Vector2.zero;
+        GroveUi.StylePrompt(text);
 
         var prompt = root.AddComponent<WorldPrompt>();
         prompt.m_Text = text;
@@ -64,7 +66,10 @@ public class WorldPrompt : MonoBehaviour
     public void SetText(string value)
     {
         if (m_Text != null && m_Text.text != value)
+        {
             m_Text.text = value;
+            GroveUi.FitPrompt(m_Text);
+        }
     }
 
     public void Place(Vector3 worldAnchor, float worldScale)

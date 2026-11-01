@@ -468,7 +468,10 @@ public class LostBall : MonoBehaviour
             ? "Ball\nGrip or trigger to pick up"
             : "Ball\nClick to pick up";
         if (m_PromptText.text != label)
+        {
             m_PromptText.text = label;
+            GroveUi.FitPrompt(m_PromptText);
+        }
 
         var camera = Camera.main;
         Vector3 anchor = transform.position + Vector3.up * 0.22f;
@@ -509,6 +512,7 @@ public class LostBall : MonoBehaviour
         var rect = m_Prompt.GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2(460f, 140f);
         rect.pivot = new Vector2(0.5f, 0f);
+        GroveUi.AddPromptSurface(rect);
 
         var group = m_Prompt.AddComponent<CanvasGroup>();
         group.blocksRaycasts = false;
@@ -530,6 +534,7 @@ public class LostBall : MonoBehaviour
         textRect.anchorMax = Vector2.one;
         textRect.offsetMin = Vector2.zero;
         textRect.offsetMax = Vector2.zero;
+        GroveUi.StylePrompt(m_PromptText);
         m_Prompt.SetActive(false);
     }
 }
