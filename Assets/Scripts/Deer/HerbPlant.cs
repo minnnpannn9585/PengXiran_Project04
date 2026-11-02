@@ -107,6 +107,7 @@ public class HerbPlant : MonoBehaviour
 
         m_Harvested = true;
         m_CloseInteraction = true;
+        InteractionFeedback.Play(FeedbackCue.Harvest, m_Sprig != null ? m_Sprig.transform.position : transform.position);
         if (m_Prompt != null)
             m_Prompt.Hide();
     }
@@ -114,7 +115,12 @@ public class HerbPlant : MonoBehaviour
     void OnHoverEntered(HoverEnterEventArgs args)
     {
         if (args.interactorObject is XRBaseInputInteractor input && !m_Hovering.Contains(input))
+        {
+            if (m_Hovering.Count == 0 && !m_Harvested
+                && GameManager.Instance != null && GameManager.Instance.CanGatherHerbs)
+                InteractionFeedback.Play(FeedbackCue.Focus, transform);
             m_Hovering.Add(input);
+        }
     }
 
     void OnHoverExited(HoverExitEventArgs args)

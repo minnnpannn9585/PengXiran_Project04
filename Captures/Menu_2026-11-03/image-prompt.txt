@@ -1,0 +1,10 @@
+Mode: built-in image_gen
+
+Use case: illustration-story.
+Asset type: finished background artwork for the main menu of a gentle forest adventure game called Grove Elf; draw ARTWORK ONLY without any UI.
+Primary request: a beautiful panoramic 16:9 flat 2D cartoon storybook woodland illustration.
+Composition: the leftmost 43% is quiet dark forest-green negative space for a cream game title and two menu buttons that will be added separately in Unity. Keep this area low detail and almost uniform, naturally framed by shadowy tree silhouettes at the far left edge and canopy overhead, NOT a rectangular panel. The right 57% opens into an inviting sunlit woodland clearing with one small gentle grey wolf, one spotted fawn, one orange fox and one ivory rabbit gathered along a winding pale woodland path. Animals are charming expressive woodland quadrupeds with natural animal poses and clear, uncluttered silhouettes. Place the four animals entirely in the right half, comfortably inset from the edges, the fawn taller behind the small rabbit, fox resting nearby, wolf sitting calmly. Include layered stylized tree canopies, broad-leaf ferns, a few tiny wildflowers and mossy stones; restrained botanical framing in the bottom corners.
+Style/medium: sophisticated clean flat 2D children's storybook illustration, confident organic shapes, elegant cut-paper-like silhouettes, very subtle paper grain, restrained detail, beautiful composition and color rhythm. No 3D, no photorealism.
+Lighting/mood: cozy, peaceful, magical without spectacle; warm cream-gold daylight through the trees on the right; soft dark green shade at the left.
+Palette: moss and sage greens, deep pine green, warm cream/gold, small terracotta accents.
+Constraints: absolutely NO TEXT, no letters, no logos, no watermark, no border, no title, no typography, no buttons, no mock UI. Full-bleed wide background, 16:9 landscape. Preserve ample empty dark space on the left for legible real menu typography.

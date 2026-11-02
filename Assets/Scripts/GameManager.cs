@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.XR;
 
 public enum GamePhase
 {
@@ -135,15 +134,11 @@ public class GameManager : MonoBehaviour
         string prompt = null;
         if (m_Phase == GamePhase.FindBall && m_Ball != null && m_Ball.IsHeld)
         {
-            prompt = XRSettings.isDeviceActive
-                ? "Point at me and press the grip or trigger to give me the ball."
-                : "Press E, or click me, to give me the ball.";
+            prompt = "Give me the ball.";
         }
         else if (m_Phase == GamePhase.PlayBall && m_Ball != null && m_Ball.IsHeld)
         {
-            prompt = XRSettings.isDeviceActive
-                ? "Throw the ball onto the marker."
-                : "Look at the marker and click to throw.";
+            prompt = "Throw the ball onto the marker.";
         }
 
         m_Wolf.SetPrompt(prompt);
@@ -250,6 +245,7 @@ public class GameManager : MonoBehaviour
 
         m_Phase = GamePhase.PlayBall;
         m_ThrowInFlight = false;
+        InteractionFeedback.Play(FeedbackCue.Place, m_Wolf != null ? m_Wolf.transform : m_Ball.transform);
         if (m_Target != null)
             m_Target.gameObject.SetActive(true);
 
@@ -284,14 +280,18 @@ public class GameManager : MonoBehaviour
         m_Phase = GamePhase.Complete;
         m_ThrowInFlight = false;
         if (m_Ball != null)
-            m_Ball.ThrowOnRelease = false;
+            m_Ball.FinishInteraction();
 
-        if (m_Wolf == null)
-            return;
+        if (m_Target != null)
+            InteractionFeedback.Play(FeedbackCue.Success, m_Target.transform.position + Vector3.up * 0.2f);
+        else if (m_Ball != null)
+            InteractionFeedback.Play(FeedbackCue.Success, m_Ball.transform);
 
-        m_Wolf.SetPrompt(null);
-        m_Wolf.Loop = true;
-        if (m_ScoredDialogue != null)
-            m_Wolf.Play(m_ScoredDialogue);
+        QuestCompletionEffects.Begin(this, m_Wolf, m_ScoredDialogue, () =>
+            QuestCompletionEffects.BurstAndHide(
+                m_Wolf != null ? m_Wolf.gameObject : null,
+                m_Ball != null ? m_Ball.gameObject : null,
+                m_Target != null ? m_Target.gameObject : null,
+                m_ReturnVolume != null ? m_ReturnVolume.gameObject : null));
     }
 }

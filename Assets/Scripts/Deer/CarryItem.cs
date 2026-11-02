@@ -29,6 +29,9 @@ public class CarryItem : MonoBehaviour
     bool m_DesktopHeld;
     bool m_Placed;
     bool m_Scaled;
+    bool m_GrabAccepted;
+    bool m_SuppressSelectFeedback;
+    bool m_HasBeenPickedUp;
     int m_IgnoreDropFrame = -1;
 
     public bool IsHeld => !m_Placed && (m_DesktopHeld || (m_Grab != null && m_Grab.isSelected));
@@ -69,6 +72,10 @@ public class CarryItem : MonoBehaviour
 
     void OnDisable()
     {
+        m_GrabAccepted = false;
+        m_DesktopHeld = false;
+        if (s_DesktopHeld == this)
+            s_DesktopHeld = null;
         if (m_Grab == null)
             return;
 
@@ -103,7 +110,7 @@ public class CarryItem : MonoBehaviour
         PlacePrompt();
     }
 
-    public bool PickUp(XRBaseInputInteractor hand)
+    public bool PickUp(XRBaseInputInteractor hand, bool playFeedback = true)
     {
         if (m_Placed)
             return false;
@@ -114,7 +121,9 @@ public class CarryItem : MonoBehaviour
 
         m_IgnoreDropFrame = Time.frameCount;
 
+        Vector3 pickupPosition = transform.position;
         HerbPlant plant = GetComponentInParent<HerbPlant>();
+        bool harvestedNow = plant != null && !plant.IsHarvested;
         if (plant != null)
             plant.MarkHarvested();
 
@@ -127,14 +136,25 @@ public class CarryItem : MonoBehaviour
             gameObject.layer = 0;
             if (m_Body != null)
             {
+                m_Body.isKinematic = false;
                 m_Body.velocity = Vector3.zero;
                 m_Body.angularVelocity = Vector3.zero;
-                m_Body.isKinematic = false;
             }
 
             transform.position = hand.transform.position;
             m_Grab.enabled = true;
-            m_Grab.interactionManager.SelectEnter((IXRSelectInteractor)hand, (IXRSelectInteractable)m_Grab);
+            // SelectEnter raises the same callback as a direct controller grab.
+            m_SuppressSelectFeedback = true;
+            try
+            {
+                m_Grab.interactionManager.SelectEnter((IXRSelectInteractor)hand, (IXRSelectInteractable)m_Grab);
+            }
+            finally
+            {
+                m_SuppressSelectFeedback = false;
+            }
+            if (m_Grab.isSelected)
+                PlayPickupFeedback(playFeedback, harvestedNow, pickupPosition);
             return true;
         }
 
@@ -146,12 +166,16 @@ public class CarryItem : MonoBehaviour
         gameObject.layer = 2;
         if (m_Body != null)
         {
-            m_Body.velocity = Vector3.zero;
-            m_Body.angularVelocity = Vector3.zero;
+            if (!m_Body.isKinematic)
+            {
+                m_Body.velocity = Vector3.zero;
+                m_Body.angularVelocity = Vector3.zero;
+            }
             m_Body.isKinematic = true;
         }
 
         HoldInFront();
+        PlayPickupFeedback(playFeedback, harvestedNow, pickupPosition);
         return true;
     }
 
@@ -159,6 +183,7 @@ public class CarryItem : MonoBehaviour
     {
         m_Placed = true;
         m_DesktopHeld = false;
+        m_GrabAccepted = false;
         if (s_DesktopHeld == this)
             s_DesktopHeld = null;
 
@@ -170,8 +195,11 @@ public class CarryItem : MonoBehaviour
 
         if (m_Body != null)
         {
-            m_Body.velocity = Vector3.zero;
-            m_Body.angularVelocity = Vector3.zero;
+            if (!m_Body.isKinematic)
+            {
+                m_Body.velocity = Vector3.zero;
+                m_Body.angularVelocity = Vector3.zero;
+            }
             m_Body.isKinematic = true;
         }
 
@@ -194,6 +222,36 @@ public class CarryItem : MonoBehaviour
             herb.SetOnTable(true);
     }
 
+    /// <summary>End desktop/XR holding before a quest prop disappears, without moving it.</summary>
+    public void FinishInteraction()
+    {
+        m_Placed = true;
+        m_DesktopHeld = false;
+        m_GrabAccepted = false;
+        if (s_DesktopHeld == this)
+            s_DesktopHeld = null;
+
+        ReleaseGrab();
+        if (m_Grab != null)
+            m_Grab.enabled = false;
+        m_Hovering.Clear();
+        if (m_Prompt != null)
+            m_Prompt.Hide();
+
+        if (m_Body != null)
+        {
+            if (!m_Body.isKinematic)
+            {
+                m_Body.velocity = Vector3.zero;
+                m_Body.angularVelocity = Vector3.zero;
+            }
+            m_Body.isKinematic = true;
+        }
+
+        foreach (var itemCollider in GetComponentsInChildren<Collider>(true))
+            itemCollider.enabled = false;
+    }
+
     public static T FindHeld<T>() where T : Component
     {
         var found = FindObjectsOfType<T>();
@@ -210,7 +268,13 @@ public class CarryItem : MonoBehaviour
     void OnHoverEntered(HoverEnterEventArgs args)
     {
         if (args.interactorObject is XRBaseInputInteractor input && !m_Hovering.Contains(input))
+        {
+            var plant = GetComponentInParent<HerbPlant>();
+            if (m_Hovering.Count == 0 && !IsHeld && AllowedToPick()
+                && (plant == null || plant.IsHarvested))
+                InteractionFeedback.Play(FeedbackCue.Focus, transform);
             m_Hovering.Add(input);
+        }
     }
 
     void OnHoverExited(HoverExitEventArgs args)
@@ -223,13 +287,19 @@ public class CarryItem : MonoBehaviour
     {
         if (!AllowedToPick())
         {
+            m_GrabAccepted = false;
             ReleaseGrab();
             return;
         }
 
+        bool alreadySelected = m_GrabAccepted;
+        m_GrabAccepted = true;
         HerbPlant plant = GetComponentInParent<HerbPlant>();
+        bool harvestedNow = plant != null && !plant.IsHarvested;
         if (plant != null)
             plant.MarkHarvested();
+        if (!alreadySelected && !m_SuppressSelectFeedback)
+            PlayPickupFeedback(true, harvestedNow, transform.position);
 
         m_DesktopHeld = false;
         if (s_DesktopHeld == this)
@@ -240,11 +310,27 @@ public class CarryItem : MonoBehaviour
 
     void OnSelectExited(SelectExitEventArgs args)
     {
+        // Two hands, forced placement and completion cleanup must not sound like a drop.
+        if (m_Grab != null && m_Grab.isSelected)
+            return;
+        bool wasGrabbed = m_GrabAccepted;
+        m_GrabAccepted = false;
         if (m_Placed || m_Body == null)
             return;
 
         m_Body.isKinematic = false;
         m_Body.useGravity = true;
+        if (wasGrabbed && isActiveAndEnabled && !args.isCanceled)
+            InteractionFeedback.Play(FeedbackCue.Drop, transform.position);
+    }
+
+    void PlayPickupFeedback(bool playFeedback, bool harvestedNow, Vector3 position)
+    {
+        // Red flowers are directly grabbable; purple sprigs also have a harvestable bush.
+        bool firstHerbPickup = !m_HasBeenPickedUp && GetComponent<Herb>() != null;
+        m_HasBeenPickedUp = true;
+        if (playFeedback && !harvestedNow)
+            InteractionFeedback.Play(firstHerbPickup ? FeedbackCue.Harvest : FeedbackCue.Pickup, position);
     }
 
     void PollTriggerGrab()
@@ -322,6 +408,8 @@ public class CarryItem : MonoBehaviour
 
     void Release()
     {
+        bool wasHeld = IsHeld;
+        m_GrabAccepted = false;
         m_DesktopHeld = false;
         if (s_DesktopHeld == this)
             s_DesktopHeld = null;
@@ -332,6 +420,8 @@ public class CarryItem : MonoBehaviour
             m_Body.isKinematic = false;
             m_Body.useGravity = true;
         }
+        if (wasHeld && !m_Placed && isActiveAndEnabled)
+            InteractionFeedback.Play(FeedbackCue.Drop, transform.position);
     }
 
     void ReleaseGrab()

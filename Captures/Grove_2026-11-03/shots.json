@@ -1,0 +1,467 @@
+[
+  {
+    "name": "01_Wolf_Landscape",
+    "animal": "LowPoly_Wolf_6",
+    "fill": 3.6,
+    "a": 130,
+    "e": 28,
+    "d": 3,
+    "f": 38,
+    "x": 0.4,
+    "y": 0.48,
+    "w": 3840,
+    "h": 2160
+  },
+  {
+    "name": "02_Wolf_Portrait",
+    "animal": "LowPoly_Wolf_6",
+    "fill": 3.6,
+    "a": 200,
+    "e": 28,
+    "d": 2.8,
+    "f": 34,
+    "x": 0.5,
+    "y": 0.48,
+    "w": 2560,
+    "h": 3200
+  },
+  {
+    "name": "03_Wolf_Square",
+    "animal": "LowPoly_Wolf_6",
+    "fill": 3.6,
+    "a": 155,
+    "e": 20,
+    "d": 1.9,
+    "f": 34,
+    "x": 0.5,
+    "y": 0.48,
+    "w": 3000,
+    "h": 3000
+  },
+  {
+    "name": "04_Wolf_Environment",
+    "animal": "LowPoly_Wolf_6",
+    "fill": 3.6,
+    "a": 60,
+    "e": 22,
+    "d": 4.2,
+    "f": 40,
+    "x": 0.65,
+    "y": 0.48,
+    "w": 3840,
+    "h": 2160
+  },
+  {
+    "name": "05_Wolf_Banner",
+    "animal": "LowPoly_Wolf_6",
+    "fill": 3.6,
+    "a": 30,
+    "e": 24,
+    "d": 5,
+    "f": 42,
+    "x": 0.67,
+    "y": 0.48,
+    "w": 4096,
+    "h": 1744
+  },
+  {
+    "name": "06_Fawn_Landscape",
+    "animal": "LowPoly_Deer_Calf_11",
+    "fill": 6,
+    "a": 225,
+    "e": 10,
+    "d": 3,
+    "f": 38,
+    "x": 0.62,
+    "y": 0.48,
+    "w": 3840,
+    "h": 2160
+  },
+  {
+    "name": "07_Fawn_Portrait",
+    "animal": "LowPoly_Deer_Calf_11",
+    "fill": 6,
+    "a": 250,
+    "e": 12,
+    "d": 2.8,
+    "f": 36,
+    "x": 0.5,
+    "y": 0.48,
+    "w": 2560,
+    "h": 3200
+  },
+  {
+    "name": "08_Fawn_Square",
+    "animal": "LowPoly_Deer_Calf_11",
+    "fill": 6,
+    "a": 235,
+    "e": 8,
+    "d": 2.1,
+    "f": 36,
+    "x": 0.5,
+    "y": 0.48,
+    "w": 3000,
+    "h": 3000
+  },
+  {
+    "name": "09_Fawn_Environment",
+    "animal": "LowPoly_Deer_Calf_11",
+    "fill": 6,
+    "a": 225,
+    "e": 12,
+    "d": 3.4,
+    "f": 50,
+    "x": 0.6,
+    "y": 0.48,
+    "w": 3840,
+    "h": 2160
+  },
+  {
+    "name": "10_Fawn_Banner",
+    "animal": "LowPoly_Deer_Calf_11",
+    "fill": 6,
+    "a": 250,
+    "e": 10,
+    "d": 3.5,
+    "f": 38,
+    "x": 0.4,
+    "y": 0.48,
+    "w": 4096,
+    "h": 1744
+  },
+  {
+    "name": "11_Fox_Landscape",
+    "animal": "Fox_1",
+    "fill": 4.4,
+    "a": 145,
+    "e": 22,
+    "d": 1.75,
+    "f": 45,
+    "x": 0.52,
+    "y": 0.48,
+    "w": 3840,
+    "h": 2160
+  },
+  {
+    "name": "12_Fox_Portrait",
+    "animal": "Fox_1",
+    "fill": 4.4,
+    "a": 170,
+    "e": 22,
+    "d": 1.8,
+    "f": 42,
+    "x": 0.5,
+    "y": 0.48,
+    "w": 2560,
+    "h": 3200
+  },
+  {
+    "name": "13_Fox_Square",
+    "animal": "Fox_1",
+    "fill": 4.4,
+    "a": 195,
+    "e": 16,
+    "d": 1.9,
+    "f": 42,
+    "x": 0.5,
+    "y": 0.48,
+    "w": 3000,
+    "h": 3000
+  },
+  {
+    "name": "14_Fox_Environment",
+    "animal": "Fox_1",
+    "fill": 4.4,
+    "a": 225,
+    "e": 30,
+    "d": 3.3,
+    "f": 42,
+    "x": 0.6,
+    "y": 0.48,
+    "w": 3840,
+    "h": 2160
+  },
+  {
+    "name": "15_Fox_Banner",
+    "animal": "Fox_1",
+    "fill": 4.4,
+    "a": 195,
+    "e": 25,
+    "d": 2.5,
+    "f": 40,
+    "x": 0.68,
+    "y": 0.48,
+    "w": 4096,
+    "h": 1744
+  },
+  {
+    "name": "16_Rabbit_Chocolate_Landscape",
+    "animal": "Rabbit_Correct",
+    "fill": 14,
+    "a": 170,
+    "e": 8,
+    "d": 1.1,
+    "f": 40,
+    "x": 0.6,
+    "y": 0.48,
+    "w": 3840,
+    "h": 2160,
+    "light": [
+      0.3,
+      0.6,
+      -1.5
+    ]
+  },
+  {
+    "name": "17_Rabbit_Chocolate_Portrait",
+    "animal": "Rabbit_Correct",
+    "fill": 10,
+    "a": 240,
+    "e": 10,
+    "d": 1.25,
+    "f": 35,
+    "x": 0.5,
+    "y": 0.48,
+    "w": 2560,
+    "h": 3200,
+    "light": [
+      -1.2,
+      0.7,
+      -0.8
+    ]
+  },
+  {
+    "name": "18_Rabbit_Chocolate_Square",
+    "animal": "Rabbit_Correct",
+    "fill": 14,
+    "a": 205,
+    "e": 4,
+    "d": 0.9,
+    "f": 38,
+    "x": 0.5,
+    "y": 0.48,
+    "w": 3000,
+    "h": 3000,
+    "light": [
+      0.3,
+      0.6,
+      -1.5
+    ]
+  },
+  {
+    "name": "19_Rabbit_Chocolate_Environment",
+    "animal": "Rabbit_Correct",
+    "fill": 14,
+    "a": 130,
+    "e": 16,
+    "d": 2,
+    "f": 40,
+    "x": 0.35,
+    "y": 0.48,
+    "w": 3840,
+    "h": 2160,
+    "light": [
+      0.3,
+      0.6,
+      -1.5
+    ]
+  },
+  {
+    "name": "20_Rabbit_Chocolate_Banner",
+    "animal": "Rabbit_Correct",
+    "fill": 10,
+    "a": 240,
+    "e": 10,
+    "d": 1.7,
+    "f": 36,
+    "x": 0.35,
+    "y": 0.48,
+    "w": 4096,
+    "h": 1744,
+    "light": [
+      -1.2,
+      0.7,
+      -0.8
+    ]
+  },
+  {
+    "name": "21_Rabbit_Amber_Landscape",
+    "animal": "Rabbit_WrongColor",
+    "fill": 6,
+    "a": 100,
+    "e": 25,
+    "d": 1.15,
+    "f": 34,
+    "x": 0.55,
+    "y": 0.48,
+    "w": 3840,
+    "h": 2160,
+    "light": [
+      1.3,
+      0.6,
+      0
+    ]
+  },
+  {
+    "name": "22_Rabbit_Amber_Portrait",
+    "animal": "Rabbit_WrongColor",
+    "fill": 5,
+    "a": 180,
+    "e": 28,
+    "d": 1.3,
+    "f": 34,
+    "x": 0.5,
+    "y": 0.48,
+    "w": 2560,
+    "h": 3200,
+    "light": [
+      0.2,
+      0.65,
+      -1.2
+    ]
+  },
+  {
+    "name": "23_Rabbit_Amber_Square",
+    "animal": "Rabbit_WrongColor",
+    "fill": 6,
+    "a": 140,
+    "e": 30,
+    "d": 1.2,
+    "f": 32,
+    "x": 0.5,
+    "y": 0.48,
+    "w": 3000,
+    "h": 3000,
+    "light": [
+      1.3,
+      0.6,
+      0
+    ]
+  },
+  {
+    "name": "24_Rabbit_Amber_Environment",
+    "animal": "Rabbit_WrongColor",
+    "fill": 6,
+    "a": 100,
+    "e": 32,
+    "d": 1.7,
+    "f": 42,
+    "x": 0.66,
+    "y": 0.48,
+    "w": 3840,
+    "h": 2160,
+    "light": [
+      1.3,
+      0.6,
+      0
+    ]
+  },
+  {
+    "name": "25_Rabbit_Amber_Banner",
+    "animal": "Rabbit_WrongColor",
+    "fill": 5,
+    "a": 180,
+    "e": 32,
+    "d": 1.5,
+    "f": 40,
+    "x": 0.35,
+    "y": 0.48,
+    "w": 4096,
+    "h": 1744,
+    "light": [
+      0.2,
+      0.65,
+      -1.2
+    ]
+  },
+  {
+    "name": "26_Rabbit_Ivory_Landscape",
+    "animal": "Rabbit_Scream",
+    "fill": 5,
+    "a": 125,
+    "e": 32,
+    "d": 1.25,
+    "f": 32,
+    "x": 0.48,
+    "y": 0.48,
+    "w": 3840,
+    "h": 2160,
+    "light": [
+      1.2,
+      0.6,
+      -0.6
+    ]
+  },
+  {
+    "name": "27_Rabbit_Ivory_Portrait",
+    "animal": "Rabbit_Scream",
+    "fill": 5,
+    "a": 165,
+    "e": 34,
+    "d": 1.25,
+    "f": 34,
+    "x": 0.5,
+    "y": 0.48,
+    "w": 2560,
+    "h": 3200,
+    "light": [
+      1.2,
+      0.6,
+      -0.6
+    ]
+  },
+  {
+    "name": "28_Rabbit_Ivory_Square",
+    "animal": "Rabbit_Scream",
+    "fill": 5,
+    "a": 130,
+    "e": 35,
+    "d": 1.2,
+    "f": 32,
+    "x": 0.5,
+    "y": 0.48,
+    "w": 3000,
+    "h": 3000,
+    "light": [
+      1.2,
+      0.6,
+      -0.6
+    ]
+  },
+  {
+    "name": "29_Rabbit_Ivory_Environment",
+    "animal": "Rabbit_Scream",
+    "fill": 5,
+    "a": 150,
+    "e": 38,
+    "d": 1.7,
+    "f": 38,
+    "x": 0.6,
+    "y": 0.48,
+    "w": 3840,
+    "h": 2160,
+    "light": [
+      1.2,
+      0.6,
+      -0.6
+    ]
+  },
+  {
+    "name": "30_Rabbit_Ivory_Banner",
+    "animal": "Rabbit_Scream",
+    "fill": 5,
+    "a": 125,
+    "e": 34,
+    "d": 1.6,
+    "f": 36,
+    "x": 0.35,
+    "y": 0.48,
+    "w": 4096,
+    "h": 1744,
+    "light": [
+      1.2,
+      0.6,
+      -0.6
+    ]
+  }
+]

@@ -1,0 +1,28 @@
+Mode: built-in image_gen edit
+Source: Assets/Resources/UI/GroveMenuIllustration.png
+Final selected output: Captures/Menu_2026-11-03/GroveMenuIllustration_Flat.png
+
+FIRST EDIT
+Use case: style-transfer.
+Asset type: final raster background artwork for a game main menu, ARTWORK ONLY, no user interface.
+
+Edit the supplied woodland illustration. Preserve the widescreen 16:9 composition and the four animals' identities and approximate positions, but REDRAW it in a radically simpler, deliberately designed flat 2D cartoon style. This must be a substantial visual simplification, not just a color filter over the original detail.
+
+Keep the leftmost 43% a calm, almost entirely solid deep pine-green field with only a few broad silhouettes around the far edges, so cream menu text can be placed there later. On the right retain one seated grey wolf, one standing spotted fawn, one seated/resting orange fox and one little ivory rabbit, in the same grouping and scale hierarchy. Make each animal from a small number of clear, confident irregular shapes: expressive silhouettes, simple dark dot or tiny oval eyes, simple muzzle and ear patches, only a handful of fawn spots. Preserve natural animal poses and leg anatomy. Avoid glossy large eyes, eyelashes, cute emoji styling and furry painterly detail.
+
+Art direction: clean matte solid-color shapes, charming economical picture-book cartoon drawing, simplified cut-paper / limited-ink screenprint design WITHOUT paper texture or print grain. Use approximately 8-10 carefully chosen flat colors shared across the scene: dark pine, moss, sage, cream, ochre, terracotta orange, warm grey and dark brown. Every shape must be filled with a uniform solid color. Sharp smooth edges and deliberate asymmetry, no perfect mirrored generic decorative patterns. Maximum one flat secondary color patch per body area, no blended shading.
+
+Simplify the forest to a few broad tree trunks and large canopy masses, two or three flat ground/path shapes, and sparse large fern or leaf silhouettes at the outer corners. Remove almost all small leaves, twigs, flowers, stones and grass blades. The winding cream path can remain as a simple flat shape. Keep the pleasant forest setting with open breathing room.
+
+Absolutely NO gradients, NO soft shadows, NO airbrushing, NO lighting bloom, NO sunbeams, NO dappled lighting, NO grain, NO paper fibers, NO mottled textures, NO fur strokes, NO 3D rendering, NO dense repetitive microdetails. A flat poster-like composition with restraint, not a lush painting.
+No words, letters, logos, watermark, buttons, frames, borders or UI. Opaque full-bleed background.
+
+SECOND EDIT (selected)
+Use case: style-transfer. Edit the attached already simplified forest cartoon.
+One targeted correction ONLY: eliminate ALL remaining gradients and lighting/shading variation so this is a true solid-color illustration. Preserve every animal, its size and location, the scene composition, the large dark-green left negative space, and the existing clean shape boundaries.
+
+The current picture still contains soft gradients on the light-green background, olive ground, trunks, canopy, fox body, fawn head and the cream path. Replace each region with ONE absolutely uniform matte color. Think of filled paths in an SVG exported to PNG, or paper shapes cut from single-color card stock. Do not simulate material or lighting on those shapes. Only antialiasing at shape edges is permitted. Solid background must be exactly the same color at its top and bottom; solid path must have exactly the same cream color along its whole length; tree trunks must have one brown fill each; animal coats must have one single flat base color with only the existing separate muzzle/ear/chest patches.
+Limit palette to roughly 10 shared color swatches. Maintain the deep pine, moss/olive green, warm cream, ochre fawn, warm grey wolf, terracotta fox. Facial marks are simple dark flat lines/dots. Remove extra beige shadow patches from the rabbit so its body is plain ivory. Each shape's interior is perfectly flat, clean and empty.
+
+NO gradients whatsoever. NO texture/noise/grain. NO blur, highlights, soft lighting, shading, vignette, ambient occlusion, paper effects or dither. No new objects or decorative details, no text, no logos, no UI or border. Full-bleed opaque 16:9 background.
+

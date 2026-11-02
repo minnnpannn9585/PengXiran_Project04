@@ -39,6 +39,8 @@ public class LostBall : MonoBehaviour
     bool m_Snapped;
     bool m_Recalling;
     int m_SnapFrames;
+    int m_IgnoreDropFrame = -1;
+    float m_NextImpactTime;
 
     public bool IsHeld => !m_Accepted && !m_Recalling && (m_DesktopHeld || (m_Grab != null && m_Grab.isSelected));
 
@@ -183,6 +185,7 @@ public class LostBall : MonoBehaviour
             return;
 
         m_Recalling = true;
+        InteractionFeedback.Play(FeedbackCue.Recall, transform);
         ReleaseGrab();
         if (transform.parent != null)
         {
@@ -193,8 +196,11 @@ public class LostBall : MonoBehaviour
 
         if (m_Body != null)
         {
-            m_Body.velocity = Vector3.zero;
-            m_Body.angularVelocity = Vector3.zero;
+            if (!m_Body.isKinematic)
+            {
+                m_Body.velocity = Vector3.zero;
+                m_Body.angularVelocity = Vector3.zero;
+            }
             m_Body.isKinematic = true;
         }
 
@@ -216,12 +222,43 @@ public class LostBall : MonoBehaviour
             m_Grab.enabled = false;
         if (m_Prompt != null)
             m_Prompt.SetActive(false);
+        InteractionFeedback.Play(FeedbackCue.Place, anchor != null ? anchor.position : transform.position);
+    }
+
+    /// <summary>Keep a successful throw at the marker while the wolf celebrates.</summary>
+    public void FinishInteraction()
+    {
+        m_Accepted = true;
+        m_DesktopHeld = false;
+        m_Recalling = false;
+        m_SnapFrames = 0;
+        ThrowOnRelease = false;
+        ReleaseGrab();
+        if (m_Grab != null)
+            m_Grab.enabled = false;
+        if (m_Body != null)
+        {
+            if (!m_Body.isKinematic)
+            {
+                m_Body.velocity = Vector3.zero;
+                m_Body.angularVelocity = Vector3.zero;
+            }
+            m_Body.isKinematic = true;
+        }
+        foreach (var collider in GetComponentsInChildren<Collider>())
+            collider.enabled = false;
+        if (m_Prompt != null)
+            m_Prompt.SetActive(false);
     }
 
     void OnHoverEntered(HoverEnterEventArgs args)
     {
         if (args.interactorObject is XRBaseInputInteractor input && !m_Hovering.Contains(input))
+        {
+            if (m_Hovering.Count == 0 && !m_Accepted && !m_Recalling && !IsHeld)
+                InteractionFeedback.Play(FeedbackCue.Focus, transform);
             m_Hovering.Add(input);
+        }
     }
 
     void OnHoverExited(HoverExitEventArgs args)
@@ -234,6 +271,8 @@ public class LostBall : MonoBehaviour
     {
         m_DesktopHeld = false;
         gameObject.layer = 0;
+        if (!m_Accepted)
+            InteractionFeedback.Play(FeedbackCue.Pickup, transform);
     }
 
     void OnSelectExited(SelectExitEventArgs args)
@@ -244,7 +283,20 @@ public class LostBall : MonoBehaviour
         if (m_Accepted || m_Recalling)
             return;
 
+        if (!args.isCanceled && isActiveAndEnabled)
+            InteractionFeedback.Play(ThrowOnRelease ? FeedbackCue.Throw : FeedbackCue.Drop, transform);
         Dropped?.Invoke(this);
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (m_Accepted || m_Recalling || IsHeld || Time.unscaledTime < m_NextImpactTime
+            || collision.relativeVelocity.sqrMagnitude < 1.44f)
+            return;
+
+        m_NextImpactTime = Time.unscaledTime + 0.18f;
+        Vector3 point = collision.contactCount > 0 ? collision.GetContact(0).point : transform.position;
+        InteractionFeedback.Play(FeedbackCue.Impact, point);
     }
 
     void PollTriggerGrab()
@@ -292,8 +344,10 @@ public class LostBall : MonoBehaviour
             return;
 
         m_DesktopHeld = true;
+        m_IgnoreDropFrame = Time.frameCount;
         gameObject.layer = 2;
         HoldInFront();
+        InteractionFeedback.Play(FeedbackCue.Pickup, transform);
     }
 
     void PollDesktopDrop()
@@ -301,6 +355,8 @@ public class LostBall : MonoBehaviour
         var mouse = Mouse.current;
         var camera = Camera.main;
         if (mouse == null || camera == null || !mouse.leftButton.wasPressedThisFrame)
+            return;
+        if (Time.frameCount == m_IgnoreDropFrame)
             return;
 
         var ray = camera.ScreenPointToRay(mouse.position.ReadValue());
@@ -320,6 +376,7 @@ public class LostBall : MonoBehaviour
             m_Body.velocity = velocity;
         }
 
+        InteractionFeedback.Play(ThrowOnRelease ? FeedbackCue.Throw : FeedbackCue.Drop, transform);
         Dropped?.Invoke(this);
     }
 
@@ -398,8 +455,11 @@ public class LostBall : MonoBehaviour
         {
             if (m_Body != null)
             {
-                m_Body.velocity = Vector3.zero;
-                m_Body.angularVelocity = Vector3.zero;
+                if (!m_Body.isKinematic)
+                {
+                    m_Body.velocity = Vector3.zero;
+                    m_Body.angularVelocity = Vector3.zero;
+                }
                 m_Body.isKinematic = false;
             }
 
@@ -410,8 +470,10 @@ public class LostBall : MonoBehaviour
         }
 
         m_DesktopHeld = true;
+        m_IgnoreDropFrame = Time.frameCount;
         gameObject.layer = 2;
         HoldInFront();
+        InteractionFeedback.Play(FeedbackCue.Pickup, transform);
     }
 
     XRBaseInputInteractor ActiveInteractor()

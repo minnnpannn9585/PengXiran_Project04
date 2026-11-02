@@ -125,6 +125,8 @@ public class MedicineTable : MonoBehaviour
         if (GameManager.Instance != null)
             GameManager.Instance.OnMedicineBrewed();
 
+        InteractionFeedback.Play(FeedbackCue.Brew,
+            m_BottlePoint != null ? m_BottlePoint.position : transform.position + Vector3.up * 0.6f);
         return true;
     }
 
@@ -151,6 +153,7 @@ public class MedicineTable : MonoBehaviour
         if (GameManager.Instance != null)
             GameManager.Instance.NoteDeerProgress();
 
+        InteractionFeedback.Play(FeedbackCue.Place, slot.position);
         return true;
     }
 
@@ -168,13 +171,18 @@ public class MedicineTable : MonoBehaviour
         if (TryPlaceHeld())
             return;
 
-        TryGrind();
+        if (!TryGrind() && !m_Brewed)
+            InteractionFeedback.Play(FeedbackCue.Blocked, transform.position + Vector3.up * 0.6f);
     }
 
     void OnHoverEntered(HoverEnterEventArgs args)
     {
         if (args.interactorObject is XRBaseInputInteractor input && !m_Hovering.Contains(input))
+        {
+            if (m_Hovering.Count == 0 && !m_Brewed)
+                InteractionFeedback.Play(FeedbackCue.Focus, transform.position + Vector3.up * 0.6f);
             m_Hovering.Add(input);
+        }
     }
 
     void OnHoverExited(HoverExitEventArgs args)

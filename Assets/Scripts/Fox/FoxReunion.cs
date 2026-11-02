@@ -89,12 +89,16 @@ public class FoxReunion : MonoBehaviour
 
     void Update()
     {
+        if (IsComplete)
+            return;
+
         if (m_Phase == FoxPhase.Waiting && m_Manager.CanStartFoxQuest)
         {
             m_Phase = FoxPhase.TalkToFox;
             // Replace a previously opened waiting conversation, too.
             m_Fox.ResetConversation(m_Introduction);
             m_Fox.Loop = false;
+            InteractionFeedback.Play(FeedbackCue.Focus, m_Fox.transform);
         }
 
         if (m_Camera == null)
@@ -141,10 +145,14 @@ public class FoxReunion : MonoBehaviour
             SetTrail(-1);
             m_FoxMotion.FollowTarget = null;
             m_Fox.ResetConversation(m_Complete);
-            m_Fox.Loop = true;
-            m_Fox.SetPrompt("Thank you. We found my old friend!");
+            m_Fox.SetPrompt(null);
+            m_Fox.enabled = false;
+            foreach (var rabbit in m_Rabbits)
+                if (rabbit != null)
+                    rabbit.enabled = false;
             if (m_Objective != null)
                 m_Objective.Hide();
+            GameCompletionPanel.Show();
             Completed?.Invoke();
         }
     }
@@ -160,7 +168,7 @@ public class FoxReunion : MonoBehaviour
         {
             dialogue.enabled = false;
             m_Phase = FoxPhase.Thanks;
-            m_Fox.Play(m_Thanks);
+            m_Fox.PlayCompletion(m_Thanks, null);
         }
     }
 
@@ -174,6 +182,7 @@ public class FoxReunion : MonoBehaviour
         rabbit.gameObject.SetActive(true);
         rabbit.enabled = false;
         SetTrail(index);
+        InteractionFeedback.Play(FeedbackCue.Focus, m_Fox.transform);
     }
 
     void BeginEncounter(int index)
@@ -187,16 +196,25 @@ public class FoxReunion : MonoBehaviour
         var rabbit = m_Rabbits[index];
         rabbit.enabled = true;
         rabbit.Loop = false;
-        rabbit.Play(rabbit.Data);
+        // Encounter stingers own the sound here; do not layer a dialogue tick over the scream/reunion.
+        rabbit.Play(rabbit.Data, index == 0);
         if (index == 1)
         {
             m_Timer = m_ScreamSeconds;
             m_ScaredRabbitMotion.PlayFear();
             if (m_ScreamSound != null)
             {
+                InteractionFeedback.PlayVisual(FeedbackCue.Surprise, rabbit.transform);
                 m_Audio.transform.position = rabbit.transform.position;
                 m_Audio.PlayOneShot(m_ScreamSound, 0.65f);
             }
+            else
+                InteractionFeedback.Play(FeedbackCue.Surprise, rabbit.transform);
+        }
+        else if (index == 2)
+        {
+            InteractionFeedback.Play(FeedbackCue.Reunion, rabbit.transform);
+            InteractionFeedback.PlayVisual(FeedbackCue.Reunion, m_Fox.transform);
         }
     }
 

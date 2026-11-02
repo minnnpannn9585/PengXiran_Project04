@@ -20,6 +20,13 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 public class DialogueInteractable : MonoBehaviour
 {
     const int ShowAllCharacters = 99999;
+    static bool s_HasInteracted;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetInteractionHint()
+    {
+        s_HasInteracted = false;
+    }
 
     enum BubbleView
     {
@@ -49,8 +56,6 @@ public class DialogueInteractable : MonoBehaviour
     CanvasGroup m_CanvasGroup;
     TextMeshProUGUI m_NameText;
     TextMeshProUGUI m_BodyText;
-    TextMeshProUGUI m_HintText;
-    TextMeshProUGUI m_ProgressText;
     RectTransform m_PanelRect;
     RectTransform m_ShadowRect;
 
@@ -65,6 +70,10 @@ public class DialogueInteractable : MonoBehaviour
     bool m_Ready;
     DialogueData m_Queued;
     string m_PromptOverride;
+    Action m_CompletionCallback;
+    float m_CompletionReadTime;
+    bool m_AutomaticCompletion;
+    bool m_SilentNextLine;
 
     public DialogueData Data => m_Data;
 
@@ -96,6 +105,9 @@ public class DialogueInteractable : MonoBehaviour
     {
         if (data == null || data.LineCount == 0)
             return;
+        m_AutomaticCompletion = false;
+        m_CompletionCallback = null;
+        m_SilentNextLine = false;
         m_Data = data;
         m_Queued = null;
         m_LineIndex = -1;
@@ -104,19 +116,39 @@ public class DialogueInteractable : MonoBehaviour
         m_VisibleUntil = 0f;
     }
 
-    public void Play(DialogueData data)
+    public void Play(DialogueData data, bool playFeedback = true)
     {
         if (data == null || data.LineCount == 0)
             return;
 
+        m_AutomaticCompletion = false;
+        m_CompletionCallback = null;
         m_Queued = null;
         m_Data = data;
         m_LineIndex = 0;
         m_ShownLine = int.MinValue;
         m_VisibleCharacters = 0f;
         m_LineComplete = false;
+        m_SilentNextLine = !playFeedback;
         m_VisibleUntil = Time.time + m_MessageHoldSeconds;
         m_NextAdvanceTime = Time.time + m_AdvanceCooldown;
+    }
+
+    /// <summary>Read each celebration line, then finish without requiring another interaction.</summary>
+    public void PlayCompletion(DialogueData data, Action onFinished)
+    {
+        if (data == null || data.LineCount == 0 || !isActiveAndEnabled)
+        {
+            onFinished?.Invoke();
+            return;
+        }
+
+        Play(data);
+        m_Loop = false;
+        m_PromptOverride = null;
+        m_AutomaticCompletion = true;
+        m_CompletionCallback = onFinished;
+        m_CompletionReadTime = 2.2f;
     }
 
     void Awake()
@@ -182,6 +214,7 @@ public class DialogueInteractable : MonoBehaviour
         PollDesktopInput();
         RefreshView();
         TickTypewriter();
+        TickCompletion();
         m_Pop = Mathf.MoveTowards(m_Pop, DesiredView() == BubbleView.Hidden ? 0f : 1f, Time.deltaTime * 5f);
     }
 
@@ -201,7 +234,11 @@ public class DialogueInteractable : MonoBehaviour
     void OnHoverEntered(HoverEnterEventArgs args)
     {
         if (args.interactorObject is XRBaseInputInteractor input && !m_Hovering.Contains(input))
+        {
+            if (m_Hovering.Count == 0)
+                InteractionFeedback.Play(FeedbackCue.Focus, AnchorPosition());
             m_Hovering.Add(input);
+        }
     }
 
     void OnHoverExited(HoverExitEventArgs args)
@@ -261,6 +298,9 @@ public class DialogueInteractable : MonoBehaviour
         if (Time.time < m_NextAdvanceTime)
             return;
 
+        if (!m_AutomaticCompletion)
+            s_HasInteracted = true;
+
         if (InterceptInteraction != null)
         {
             Delegate[] handlers = InterceptInteraction.GetInvocationList();
@@ -292,6 +332,7 @@ public class DialogueInteractable : MonoBehaviour
         if (!m_LineComplete)
         {
             CompleteLine();
+            InteractionFeedback.Play(FeedbackCue.Dialogue, AnchorPosition());
             return;
         }
 
@@ -299,7 +340,11 @@ public class DialogueInteractable : MonoBehaviour
         {
             DialogueData data = m_Data;
             int index = m_LineIndex;
+            Action completion = m_CompletionCallback;
+            m_CompletionCallback = null;
+            m_AutomaticCompletion = false;
             Finished?.Invoke(this);
+            completion?.Invoke();
             if (m_Data != data || m_LineIndex != index)
                 return;
 
@@ -339,8 +384,6 @@ public class DialogueInteractable : MonoBehaviour
             SetText(m_NameText, m_Data.SpeakerName);
             SetBody(PromptText());
             m_BodyText.maxVisibleCharacters = ShowAllCharacters;
-            SetText(m_HintText, string.Empty);
-            SetText(m_ProgressText, "LET'S TALK");
             return;
         }
 
@@ -348,17 +391,20 @@ public class DialogueInteractable : MonoBehaviour
         if (m_ShownLine != m_LineIndex)
         {
             m_ShownLine = m_LineIndex;
+            // A single soft response per line, with a small visual settle rather than character chatter.
+            m_Pop = Mathf.Min(m_Pop, 0.7f);
+            if (!m_SilentNextLine)
+                InteractionFeedback.Play(FeedbackCue.Dialogue, AnchorPosition());
+            m_SilentNextLine = false;
+            m_CompletionReadTime = Mathf.Clamp(m_Data.GetLine(m_LineIndex).Length / 25f, 2.2f, 4f);
             SetText(m_NameText, m_Data.SpeakerName);
             SetBody(m_Data.GetLine(m_LineIndex));
-            SetText(m_ProgressText, $"{m_LineIndex + 1:00} / {m_Data.LineCount:00}");
             m_BodyText.ForceMeshUpdate();
             m_VisibleCharacters = 0f;
             int count = m_BodyText.textInfo.characterCount;
             m_LineComplete = count == 0;
             m_BodyText.maxVisibleCharacters = m_LineComplete ? ShowAllCharacters : 0;
         }
-
-        SetText(m_HintText, m_LineComplete ? ContinueHint() : string.Empty);
     }
 
     void TickTypewriter()
@@ -380,8 +426,20 @@ public class DialogueInteractable : MonoBehaviour
         m_BodyText.maxVisibleCharacters = ShowAllCharacters;
     }
 
+    void TickCompletion()
+    {
+        if (!m_AutomaticCompletion || !m_LineComplete || m_View != BubbleView.Speaking)
+            return;
+
+        m_CompletionReadTime -= Time.deltaTime;
+        if (m_CompletionReadTime <= 0f)
+            TryAdvance();
+    }
+
     BubbleView DesiredView()
     {
+        if (m_AutomaticCompletion && m_LineIndex >= 0)
+            return BubbleView.Speaking;
         float distance = DistanceToViewer();
         bool hovering = m_Hovering.Count > 0;
         if (m_LineIndex >= 0 && (hovering || distance <= m_StayDistance || Time.time < m_VisibleUntil))
@@ -393,27 +451,11 @@ public class DialogueInteractable : MonoBehaviour
 
     string PromptText()
     {
-        if (!string.IsNullOrEmpty(m_PromptOverride))
-            return m_PromptOverride;
+        if (!s_HasInteracted)
+            return UsingControllers() ? "Grip or trigger to interact" : "Press E or click to interact";
 
-        return UsingControllers()
-            ? "Point at me and press the grip or trigger."
-            : "Press E, or click me, to talk.";
-    }
-
-    string ContinueHint()
-    {
-        bool repeat = m_Loop && m_LineIndex >= m_Data.LineCount - 1;
-        if (UsingControllers())
-        {
-            return repeat
-                ? "Grip or trigger to hear that again"
-                : "Grip or trigger to continue";
-        }
-
-        return repeat
-            ? "Press E to hear that again"
-            : "Press E to continue";
+        // Keep nearby characters discoverable by name, without repeating the input tutorial.
+        return m_PromptOverride ?? string.Empty;
     }
 
     static bool UsingControllers()
@@ -560,67 +602,39 @@ public class DialogueInteractable : MonoBehaviour
 
         var shadow = GroveUi.CreateSurface("Shadow", root, new Color(0.01f, 0.025f, 0.02f, 0.24f));
         m_ShadowRect = shadow.rectTransform;
-        SetBottom(m_ShadowRect, new Vector2(880f, 268f), new Vector2(0f, 18f));
+        SetBottom(m_ShadowRect, new Vector2(880f, 208f), new Vector2(0f, 18f));
 
         var panel = GroveUi.CreateSurface("Panel", root, GroveUi.Surface);
         m_PanelRect = panel.rectTransform;
-        SetBottom(m_PanelRect, new Vector2(880f, 268f), new Vector2(0f, 26f));
-
-        var accent = GroveUi.CreateSurface("Accent", m_PanelRect, GroveUi.Accent, 2f);
-        var accentRect = accent.rectTransform;
-        accentRect.anchorMin = accentRect.anchorMax = new Vector2(0f, 1f);
-        accentRect.pivot = new Vector2(0f, 1f);
-        accentRect.sizeDelta = new Vector2(4f, 24f);
-        accentRect.anchoredPosition = new Vector2(36f, -30f);
+        SetBottom(m_PanelRect, new Vector2(880f, 208f), new Vector2(0f, 26f));
 
         m_NameText = CreateText("Name", m_PanelRect, font, 28f, FontStyles.Bold, TextAlignmentOptions.MidlineLeft, GroveUi.Sage);
         var nameRect = m_NameText.rectTransform;
         nameRect.anchorMin = new Vector2(0f, 1f);
         nameRect.anchorMax = new Vector2(1f, 1f);
-        nameRect.offsetMin = new Vector2(56f, -64f);
-        nameRect.offsetMax = new Vector2(-240f, -20f);
-
-        m_ProgressText = CreateText("Progress", m_PanelRect, font, 23f, FontStyles.Normal, TextAlignmentOptions.MidlineRight, GroveUi.Muted);
-        m_ProgressText.characterSpacing = 2f;
-        var progressRect = m_ProgressText.rectTransform;
-        progressRect.anchorMin = progressRect.anchorMax = Vector2.one;
-        progressRect.pivot = Vector2.one;
-        progressRect.sizeDelta = new Vector2(200f, 44f);
-        progressRect.anchoredPosition = new Vector2(-36f, -20f);
+        nameRect.offsetMin = new Vector2(36f, -64f);
+        nameRect.offsetMax = new Vector2(-36f, -20f);
 
         m_BodyText = CreateText("Body", m_PanelRect, font, 40f, FontStyles.Normal, TextAlignmentOptions.TopLeft, GroveUi.Text);
         m_BodyText.lineSpacing = 6f;
         var bodyRect = m_BodyText.rectTransform;
         bodyRect.anchorMin = Vector2.zero;
         bodyRect.anchorMax = Vector2.one;
-        bodyRect.offsetMin = new Vector2(36f, 76f);
+        bodyRect.offsetMin = new Vector2(36f, 24f);
         bodyRect.offsetMax = new Vector2(-36f, -82f);
-
-        var divider = GroveUi.CreateSurface("Divider", m_PanelRect, new Color(0.72f, 0.79f, 0.72f, 0.18f), 1f);
-        var dividerRect = divider.rectTransform;
-        dividerRect.anchorMin = Vector2.zero;
-        dividerRect.anchorMax = Vector2.right;
-        dividerRect.offsetMin = new Vector2(36f, 60f);
-        dividerRect.offsetMax = new Vector2(-36f, 61f);
-
-        m_HintText = CreateText("Hint", m_PanelRect, font, 24f, FontStyles.Normal, TextAlignmentOptions.MidlineLeft, GroveUi.Muted);
-        var hintRect = m_HintText.rectTransform;
-        hintRect.anchorMin = Vector2.zero;
-        hintRect.anchorMax = Vector2.right;
-        hintRect.offsetMin = new Vector2(36f, 18f);
-        hintRect.offsetMax = new Vector2(-36f, 50f);
     }
 
     void SetBody(string value)
     {
-        if (m_BodyText.text == value)
+        bool hasBody = !string.IsNullOrEmpty(value);
+        if (m_BodyText.text == value && m_BodyText.gameObject.activeSelf == hasBody)
             return;
 
         m_BodyText.text = value;
-        // Measure the complete line before the typewriter starts, so the card never jumps
-        // or lets a third line run into the controls.
+        m_BodyText.gameObject.SetActive(hasBody);
+        // Measure the complete line before the typewriter starts, so the card never jumps.
         float bodyHeight = m_BodyText.GetPreferredValues(value, 808f, Mathf.Infinity).y;
-        float height = Mathf.Max(268f, Mathf.Ceil(bodyHeight) + 158f);
+        float height = hasBody ? Mathf.Max(208f, Mathf.Ceil(bodyHeight) + 106f) : 84f;
         m_PanelRect.sizeDelta = new Vector2(880f, height);
         m_ShadowRect.sizeDelta = m_PanelRect.sizeDelta;
     }

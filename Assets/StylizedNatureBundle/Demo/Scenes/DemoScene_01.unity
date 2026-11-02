@@ -15,18 +15,18 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 1
-  m_FogColor: {r: 0.48504806, g: 0.8557169, b: 0.9433962, a: 1}
+  m_FogColor: {r: 0.63, g: 0.72, b: 0.76, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.019
-  m_LinearFogStart: 18.2
-  m_LinearFogEnd: 88
-  m_AmbientSkyColor: {r: 0.03529412, g: 0.13333334, b: 0.25490198, a: 1}
-  m_AmbientEquatorColor: {r: 0.3147351, g: 0.3773585, b: 0.3008188, a: 1}
-  m_AmbientGroundColor: {r: 0.185631, g: 0.254717, b: 0.12855999, a: 1}
-  m_AmbientIntensity: 0
+  m_LinearFogStart: 25
+  m_LinearFogEnd: 110
+  m_AmbientSkyColor: {r: 0.45, g: 0.53, b: 0.64, a: 1}
+  m_AmbientEquatorColor: {r: 0.34, g: 0.38, b: 0.36, a: 1}
+  m_AmbientGroundColor: {r: 0.2, g: 0.23, b: 0.2, a: 1}
+  m_AmbientIntensity: 1
   m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: d5a318bae21878b43960308eaca8b8fa, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 1097f271077416443bbbfb2d081829ec, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -35,7 +35,7 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 128
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 0.2
+  m_ReflectionIntensity: 0.25
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 1434535746}
   m_UseRadianceAmbientProbe: 0
@@ -13368,6 +13368,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4007265839510459658, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_RenderPostProcessing
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -16341,8 +16345,8 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 1, g: 0.941657, b: 0.4198113, a: 1}
-  m_Intensity: 1
+  m_Color: {r: 1, g: 0.956, b: 0.865, a: 1}
+  m_Intensity: 1.08
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -16351,9 +16355,9 @@ Light:
     m_Type: 2
     m_Resolution: 3
     m_CustomResolution: -1
-    m_Strength: 0.9
-    m_Bias: 0.01
-    m_NormalBias: 0.4
+    m_Strength: 0.78
+    m_Bias: 0.045
+    m_NormalBias: 0.22
     m_NearPlane: 0.2
     m_CullingMatrixOverride:
       e00: 1
@@ -16400,7 +16404,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1434535744}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.8323273, y: 0.2981711, z: -0.23266174, w: 0.4052084}
+  m_LocalRotation: {x: 0.39098036, y: -0.25180724, z: 0.112111814, w: 0.87815624}
   m_LocalPosition: {x: 0, y: 2.3213682, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -19807,7 +19811,7 @@ GameObject:
   - component: {fileID: 1737899073}
   - component: {fileID: 1737899072}
   m_Layer: 0
-  m_Name: Rabbit Trail Bloom
+  m_Name: Forest Atmosphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19829,7 +19833,7 @@ MonoBehaviour:
   priority: 20
   blendDistance: 0
   weight: 1
-  sharedProfile: {fileID: 11400000, guid: 83f698278cffeb244a3f18a409d7a8a7, type: 2}
+  sharedProfile: {fileID: 11400000, guid: d2e2a16d370195542bb6d03070f2c8a5, type: 2}
 --- !u!4 &1737899073
 Transform:
   m_ObjectHideFlags: 0
